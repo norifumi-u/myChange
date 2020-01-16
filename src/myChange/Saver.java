@@ -49,7 +49,8 @@ public class Saver {
 //		    MyChange_S_1 s1 = new MyChange_S_1(saver);
 //
 //		    while(Data.t < 50000) {
-//			    if(Data.t % 5000 == 0){
+//				Data time = new Data(1);
+//			    if(time % 5000 == 0){
 //			    	System.out.println("Saver: t = " + Data.t);
 //			    	s1 = s1.send(D2, save2);
 //			    	System.out.println("Saver: save2 sent");

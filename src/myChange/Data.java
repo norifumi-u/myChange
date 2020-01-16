@@ -22,6 +22,10 @@ import myChange.MyChange.statechans.D2.MyChange_D2_1_Future;
 public class Data {
 	static int t=0;
 
+	public Data(int t) {
+		Data.t += t;
+	}
+
     public static void main(String[] args) throws Exception {
 
     	int n = 1, a = 0;
@@ -102,45 +106,3 @@ public class Data {
 		}
     }
 }
-
-
-
-//MyChange_D1_1_Cases case1 = d1.branch(C);
-//switch(case1.op) {
-//case change:
-//	case1.receive(C, change);
-//	System.out.println(a + " ⇨ " + b);
-//	a++;
-//	flag = true;
-//	break;
-//case save1:
-//	case1.receive(C, save1);
-//	if(flag) {
-//		//doSave();
-//		n++;
-//		System.out.println(n + "回目  保存しました。");
-//		flag = false;
-//	}
-//	else break;
-//case exit:
-//	case1.receive(C, exit);
-//	System.out.println("終了しました。");
-//	break;
-//}
-
-
-//MyChange_D2_1_Cases case2 = d2.branch(S);
-//switch(case2.op) {
-//case save2:
-//	case2.receive(S, save2);
-//	if (flag) {
-//		//doSave();
-//		n++;
-//		System.out.println(n + "回目　保存しました。");
-//		flag = false;
-//	} else break;
-//case exit:
-//	case2.receive(S, exit);
-//	System.out.println("終了しました。");
-//	break;
-//}
