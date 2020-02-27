@@ -17,9 +17,8 @@ public final class MyChange extends org.scribble.runtime.session.Session {
 	public static final C C = myChange.MyChange.roles.C.C;
 	public static final S S = myChange.MyChange.roles.S.S;
 	public static final change change = myChange.MyChange.ops.change.change;
-	public static final save2 save2 = myChange.MyChange.ops.save2.save2;
+	public static final save save = myChange.MyChange.ops.save.save;
 	public static final exit exit = myChange.MyChange.ops.exit.exit;
-	public static final save1 save1 = myChange.MyChange.ops.save1.save1;
 	public static final List<Role> ROLES = Collections.unmodifiableList(Arrays.asList(new Role[] {D1, D2, C, S}));
 
 	public MyChange() {

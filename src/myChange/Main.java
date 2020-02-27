@@ -2,6 +2,9 @@ package myChange;
 
 import java.io.IOException;
 
+import org.scribble.runtime.net.ScribServerSocket;
+import org.scribble.runtime.net.SocketChannelServer;
+
 public class Main {
 
 	public static abstract class MyRunnable implements Runnable {
@@ -17,9 +20,9 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException, IOException {
-//		try (
-//				ScribServerSocket s1 = new SocketChannelServer(8888);
-//			 	ScribServerSocket s2 = new SocketChannelServer(7777)) {
+		try (
+				ScribServerSocket s1 = new SocketChannelServer(8888);
+			 	ScribServerSocket s2 = new SocketChannelServer(7777)) {
 			var changer = new Thread(new MyRunnable() {
 				@Override
 				public void myrun() throws Exception {
@@ -32,16 +35,19 @@ public class Main {
 					Saver.run();
 				}
 			});
-//			var data = new Thread(new MyRunnable() {
-//				@Override
-//				public void myrun() throws Exception {
-//					Data.run(s1, s2);
-//				}
-//			});
-//			data.start();
+			var data = new Thread(new MyRunnable() {
+				@Override
+				public void myrun() throws Exception {
+					Data.run(s1, s2);
+				}
+			});
+			data.start();
 			changer.start();
 			saver.start();
-//		}
+			changer.join();
+			saver.join();
+			data.join();
+		}
 	}
 
 }

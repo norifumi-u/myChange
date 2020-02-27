@@ -3,25 +3,19 @@ module myChange;
 global protocol MyChange(role C, role S, role D1, role D2){
 
        rec t1 {
-         choice at S{
-           save2() from S to D2;
-	   	   continue t1;
-         } //or {
-          // exit() from S to D2;
-         //}
+         save() from S to D2;
+         continue t1;
        }
 
        rec t2 {
          choice at C {
-	  	   change() from C to D1;
-		   continue t2;
-	     } or {
-		   save1() from C to D1;
-	  	   continue t2;
-		 } or {
-	   	   exit() from C to D1;
-	 	 }
+           change() from C to D1;
+           continue t2;
+         } or {
+           save() from C to D1;
+           continue t2;
+         } or {
+           exit() from C to D1;
+         }
        }
-
-
 }

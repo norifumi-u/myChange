@@ -6,7 +6,7 @@ import myChange.MyChange.roles.*;
 import myChange.MyChange.ops.*;
 import myChange.MyChange.statechans.C.ioifaces.*;
 
-public final class MyChange_C_1 extends org.scribble.runtime.statechans.OutputSocket<MyChange, C> implements Select_C_D1_change__D1_exit__D1_save1<MyChange_C_1, EndSocket, MyChange_C_1> {
+public final class MyChange_C_1 extends org.scribble.runtime.statechans.OutputSocket<MyChange, C> implements Select_C_D1_change__D1_exit__D1_save<MyChange_C_1, EndSocket, MyChange_C_1> {
 	public static final MyChange_C_1 cast = null;
 
 	protected MyChange_C_1(org.scribble.runtime.session.SessionEndpoint<MyChange, C> se, boolean dummy) {
@@ -24,8 +24,8 @@ public final class MyChange_C_1 extends org.scribble.runtime.statechans.OutputSo
 		return new MyChange_C_1(this.se, true);
 	}
 
-	public MyChange_C_1 send(D1 role, save1 op) throws org.scribble.main.ScribRuntimeException, IOException {
-		super.writeScribMessage(role, MyChange.save1);
+	public MyChange_C_1 send(D1 role, save op) throws org.scribble.main.ScribRuntimeException, IOException {
+		super.writeScribMessage(role, MyChange.save);
 
 		return new MyChange_C_1(this.se, true);
 	}

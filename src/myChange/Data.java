@@ -20,89 +20,98 @@ import myChange.MyChange.statechans.D2.MyChange_D2_1;
 import myChange.MyChange.statechans.D2.MyChange_D2_1_Future;
 
 public class Data {
-	static int t=0;
-
-	public Data(int t) {
-		Data.t += t;
-	}
+    private static boolean flag = false;
 
     public static void main(String[] args) throws Exception {
+    	try (ScribServerSocket s1 = new SocketChannelServer(8888);
+    		 ScribServerSocket s2 = new SocketChannelServer(7777)) {
+    		run(s1, s2);
+    	}
+    }
 
-    	int n = 1, a = 0;
+    public static void run(ScribServerSocket s1, ScribServerSocket s2) throws Exception {
 
-    	boolean flag = false;
+    	new Thread(new Runnable() {public void run() {
+		    try (MPSTEndpoint<MyChange, D2> data2 = new MPSTEndpoint<>(new MyChange(), D2, new ObjectStreamFormatter())) {
+				data2.accept(s2, S);
 
-		try (ScribServerSocket s1 = new SocketChannelServer(8888); ScribServerSocket s2 = new SocketChannelServer(7777)) {
-				try (MPSTEndpoint<MyChange, D1> data1 = new MPSTEndpoint<>(new MyChange(), D1, new ObjectStreamFormatter());
-				     MPSTEndpoint<MyChange, D2> data2 = new MPSTEndpoint<>(new MyChange(), D2, new ObjectStreamFormatter())) {
+				MyChange_D2_1 d2 = new MyChange_D2_1(data2);
 
-				    data1.accept(s1, C);
-				    data2.accept(s2, S);
+				var buf = new Buf<MyChange_D2_1_Future>();
+				d2 = d2.async(S, save, buf);
 
-				    MyChange_D1_1 d1 = new MyChange_D1_1(data1);
-				    MyChange_D2_1 d2 = new MyChange_D2_1(data2);
-
-			    	var buf = new Buf<MyChange_D2_1_Future>();
-				    d2 = d2.async(S, save2, buf);
-
-				    exit:
-				    while(true) {
-				    	int b = a+1;
-
-				    	System.out.println("D2: step");
-				    	new Thread(new Runnable() {public void run() {
-				    		try {
-				    			buf.val.sync();
-				    		} catch(IOException e) {
-				    			e.printStackTrace();
-				    		}
-				    	}}).start();
-				    	if(buf.val.isDone()) {
-				    		System.out.println("D2: save2 received");
-				    		if(flag) {
-				    			System.out.println(n + "回目　保存しました。");
-				    			n++;
-				    			flag = false;
-				    		}
-				    		else System.out.println("D2: 何もしない。");
-				    		d2 = d2.async(S, save2, buf);
+				while(true) {
+					runAsync(() -> buf.val.sync());
+				    System.out.println("D2: step");
+				    if(buf.val.isDone()) {
+				    	System.out.println("D2: save received");
+				    	if(flag) {
+				    		System.out.println("保存しました。");
+				    		flag = false;
 				    	}
-
-					    buf.val.sync();
-					    System.out.println("--------------");
-
-					    MyChange_D1_1_Cases case1 = d1.branch(C);
-					    switch(case1.op) {
-					    case change:
-					    	d1 = case1.receive(C, change);
-					    	System.out.println("D1: change received");
-					    	System.out.println(a + " ⇨ " + b);
-					    	a++;
-					    	if(!flag) flag = true;
-					    	break;
-					    case save1:
-					    	d1 = case1.receive(C, save1);
-					    	System.out.println("D1: save1 received");
-					    	if(flag) {
-					    		//doSave();
-					    		System.out.println(n + "回目  保存しました。");
-					    		n++;
-					    		flag = false;
-					    	}
-					    	else System.out.println("D1: 何もしない。");
-					    	break;
-					    case exit:
-					    	case1.receive(C, exit);
-					    	System.out.println("D1: exit received");
-					    	System.out.println("終了しました。");
-					    	break exit;
-					    }
-					    t++;
-					    //System.out.println("Data: t = "+t);
+				    	else System.out.println("D2: 何もしない。");
+					d2 = d2.async(S, save, buf);
 				    }
+				    buf.val.sync();
 				}
-		} catch (ScribRuntimeException | IOException | ClassNotFoundException e) {
+		    } catch (ScribRuntimeException | IOException e) {
+		    	e.printStackTrace();
+		    }
+    	}}).start();
+
+		try (MPSTEndpoint<MyChange, D1> data1 =
+			 new MPSTEndpoint<>(new MyChange(), D1, new ObjectStreamFormatter())) {
+
+		    int a=0;
+		    data1.accept(s1, C);
+
+		    MyChange_D1_1 d1 = new MyChange_D1_1(data1);
+
+		    exit:
+		    while(true) {
+		    	int b = a+1;
+				MyChange_D1_1_Cases case1 = d1.branch(C);
+				switch(case1.op) {
+				case change:
+				    d1 = case1.receive(C, change);
+				    System.out.println("D1: change received");
+				    System.out.println("データの書き換え " + a + " ⇨ " + b);
+				    a++;
+				    if(!flag) flag = true;
+				    break;
+				case save:
+				    d1 = case1.receive(C, save);
+				    System.out.println("D1: save received");
+				    if(flag) {
+					System.out.println("保存しました。");
+					flag = false;
+				    }
+				    else System.out.println("D1: 何もしない。");
+				    break;
+				case exit:
+				    case1.receive(C, exit);
+				    System.out.println("D1: exit received");
+				    System.out.println("終了しました。");
+				    break exit;
+				}
+		    }
+
+
+		} catch (ScribRuntimeException | IOException e) {
 		    e.printStackTrace();
 		}
     }
+	public static interface RunnableWithIOException {
+		public void run() throws IOException;
+	}
+
+	public static void runAsync(RunnableWithIOException r) {
+		new Thread(() -> {
+			try {
+				r.run();
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		}).start();
+	}
 }

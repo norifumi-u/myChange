@@ -3,6 +3,7 @@ package myChange;
 import static myChange.MyChange.MyChange.*;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.scribble.main.ScribRuntimeException;
 import org.scribble.runtime.message.ObjectStreamFormatter;
@@ -21,44 +22,26 @@ public class Saver {
 
     public static void run() throws Exception {
 
-		int t = 0;
-
-		try (MPSTEndpoint<MyChange, S> saver = new MPSTEndpoint<>(new MyChange(), S, new ObjectStreamFormatter())) {
+		MPSTEndpoint<MyChange, S> saver = new MPSTEndpoint<>(new MyChange(), S, new ObjectStreamFormatter());
+		try {
 		    saver.request(D2, SocketChannelEndpoint::new, "localhost", 7777);
 
 		    MyChange_S_1 s1 = new MyChange_S_1(saver);
 
-		    while(t < 50000) {
-			    if(t%5000 == 0){
-			    	s1 = s1.send(D2, save2);
-			    	System.out.println("Saver: save2 sent");
+		    long start = new Date().getTime();
+		    long now = 0;
+		    long lastSaved = 0;
+		    while(now - start < 5000) {
+			    if(now - lastSaved > 1000){
+			    	s1 = s1.send(D2, save);
+			    	System.out.println("Saver: save sent");
+			    	lastSaved = now;
 			    }
-			    t++;
+			    now = new Date().getTime();
 			}
-			//s1.send(D2, exit);
 		} catch (ScribRuntimeException | IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Saver: finished");
     }
-
-//	public static void run() throws Exception {
-//
-//		try (MPSTEndpoint<MyChange, S> saver = new MPSTEndpoint<>(new MyChange(), S, new ObjectStreamFormatter())) {
-//		    saver.request(D2, SocketChannelEndpoint::new, "localhost", 7777);
-//
-//		    MyChange_S_1 s1 = new MyChange_S_1(saver);
-//
-//		    while(Data.t < 50000) {
-//				Data time = new Data(1);
-//			    if(time % 5000 == 0){
-//			    	System.out.println("Saver: t = " + Data.t);
-//			    	s1 = s1.send(D2, save2);
-//			    	System.out.println("Saver: save2 sent");
-//			    }
-//		    }
-//			//s1.send(D2, exit);
-//		} catch (ScribRuntimeException | IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 }
